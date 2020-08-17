@@ -1,0 +1,11 @@
+open www.<website>.org 
+user <ftp_user> <ftp_password>
+lcd ../www
+cd www/wstation
+prompt off
+passive
+binary
+mput *.png
+ascii
+put latest.htm
+bye

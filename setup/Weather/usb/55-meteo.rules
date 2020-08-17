@@ -1,0 +1,20 @@
+# Udev rules file for YOUR products.
+# detects plug of a known product
+# allows group permission for the ANY THAT YOU ARE MEMBER OF e.g.  video group
+# creates a symlink /dev/meteo
+#
+# V1.1 - 20100216/BM
+#
+ACTION!="add", GOTO="meteo_rules_end"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", GOTO="meteo_pid_test"
+SUBSYSTEM!="usb_device", GOTO="meteo_rules_end"
+
+LABEL="meteo_pid_test"
+
+# allow access permission via GROUP setting of those devices
+
+# METEO USB - is an USB device with VID and PID that shall be used by YOUR_GROUP members and named DEVNAME
+# ENTER below-->  VID                       PID    METEO_USB                     DEVNAME
+SYSFS{idVendor}=="1941", SYSFS{idProduct}=="8021", OWNER="root", GROUP="video", MODE="0660", SYMLINK+="meteo"
+
+LABEL="meteo_rules_end"
