@@ -9,12 +9,12 @@
 #include <wx/file.h>     // wxFile
 #include <wx/cmdline.h>  // command line parser
 
-#include "cpde_utils/stringcnv.h"
-#include "cpde_utils/lexical_cast.h"
+//#include "cf_utils/stringcnv.h"
+#include "cf_utils/lexical_cast.h"
 #include "wsp/wsp_plus.h"
 
-#include "cpde_sqlite3/sqlTransaction.h"
-#include "cpde_sqlite3/sqlQuery.h"
+#include "ck_sqlite3/sqlTransaction.h"
+#include "ck_sqlite3/sqlQuery.h"
 
 #include "sqlWeatherStation.h"
 #include "sqlTextExporter.h"
@@ -44,17 +44,17 @@ typedef map<wxString,wxString> CmdLineMap;    // CmdLineMap
 static const wxCmdLineEntryDesc cmdLineDesc[] =
 {
   //   kind            shortName          longName           description                                                                parameterType          flag(s)
-  { wxCMD_LINE_PARAM,  wxT("database"),   wxT("database"),   wxT("   <database filename>"),                                             wxCMD_LINE_VAL_STRING, wxCMD_LINE_OPTION_MANDATORY  },
-  { wxCMD_LINE_SWITCH, wxT("i"),          wxT("init_db") ,   wxT("   Initialise new database"),                                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_SWITCH, wxT("l"),          wxT("latest") ,    wxT("   Show latest data on screen (1 entry)"),                            wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_SWITCH, wxT("s"),          wxT("store") ,     wxT("   Store latest data to database (1 entry)"),                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_OPTION, wxT("xd"),         wxT("xdays") ,     wxT("   Export <num> days to standard output"),                            wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_OPTION, wxT("xe"),         wxT("xelev"),      wxT("      Export: Elevation above sea level, <str>=[m]"),                 wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_OPTION, wxT("xr"),         wxT("xrdat"),      wxT("      Export: Rain level datum, <str>=[mm]"),                         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_OPTION, wxT("xh"),         wxT("xhtml"),      wxT("      Export: latest numeric values to html file, <str>=[filename]"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_SWITCH, wxT("xu"),         wxT("xutc") ,      wxT("      Export: use UTC time instead of local time"),                   wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_OPTION, wxT("co"),         wxT("conv"),       wxT("   Convert old data <str>=WStest1"),                                  wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
-  { wxCMD_LINE_NONE }
+  { wxCMD_LINE_PARAM,  wxT_2("database"),   wxT_2("database"),   wxT_2("   <database filename>"),                                             wxCMD_LINE_VAL_STRING, wxCMD_LINE_OPTION_MANDATORY  },
+  { wxCMD_LINE_SWITCH, wxT_2("i"),          wxT_2("init_db") ,   wxT_2("   Initialise new database"),                                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_SWITCH, wxT_2("l"),          wxT_2("latest") ,    wxT_2("   Show latest data on screen (1 entry)"),                            wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_SWITCH, wxT_2("s"),          wxT_2("store") ,     wxT_2("   Store latest data to database (1 entry)"),                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("xd"),         wxT_2("xdays") ,     wxT_2("   Export <num> days to standard output"),                            wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("xe"),         wxT_2("xelev"),      wxT_2("      Export: Elevation above sea level, <str>=[m]"),                 wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("xr"),         wxT_2("xrdat"),      wxT_2("      Export: Rain level datum, <str>=[mm]"),                         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("xh"),         wxT_2("xhtml"),      wxT_2("      Export: latest numeric values to html file, <str>=[filename]"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_SWITCH, wxT_2("xu"),         wxT_2("xutc") ,      wxT_2("      Export: use UTC time instead of local time"),                   wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("co"),         wxT_2("conv"),       wxT_2("   Convert old data <str>=WStest1"),                                  wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_NONE,   wxT_2(""),           wxT_2(""),           wxT_2(""),                                                                   wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    }
 };
 
 void ParserToMap(wxCmdLineParser& parser, CmdLineMap& cmdMap)
@@ -142,6 +142,15 @@ void convert_WStest1(sqlDatabase* db)
       }
    }
 
+}
+
+inline std::string cnv(const wxString& wx_string)
+{
+#if wxCHECK_VERSION(3, 0, 0)
+   return wx_string.ToStdString();
+#else
+   return std::string(wx_string.fn_str());
+#endif
 }
 
 int main(int argc, char **argv)

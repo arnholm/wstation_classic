@@ -1,6 +1,6 @@
 #include "sqlWeatherStation.h"
-#include "cpde_sqlite3/sqlTable.h"
-#include "cpde_utils/cpde_utils.h"
+#include "ck_sqlite3/sqlTable.h"
+#include "cf_utils/cf_utils.h"
 #include <sstream>
 #include <typeinfo>
 #include <cmath>

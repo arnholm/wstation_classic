@@ -1,7 +1,7 @@
 #ifndef SQLWEATHERSTATION_H
 #define SQLWEATHERSTATION_H
 
-#include "cpde_sqlite3/sqlObject.h"
+#include "ck_sqlite3/sqlObject.h"
 #include "wsp/wsp_plus.h"
 #include <string>
 using namespace std;

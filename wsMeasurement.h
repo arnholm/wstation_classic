@@ -1,8 +1,8 @@
 #ifndef WSMEASUREMENT_H
 #define WSMEASUREMENT_H
 
-#include "cpde_sqlite3/sqlObject.h"
-#include "cpde_sqlite3/sqlRow.h"
+#include "ck_sqlite3/sqlObject.h"
+#include "ck_sqlite3/sqlRow.h"
 #include <iostream>
 using namespace std;
 

@@ -1,6 +1,6 @@
 #include "wsMeasurement.h"
-#include "cpde_sqlite3/sqlDatabase.h"
-#include "cpde_sqlite3/sqlTable.h"
+#include "ck_sqlite3/sqlDatabase.h"
+#include "ck_sqlite3/sqlTable.h"
 #include <iomanip>
 #include <sstream>
 

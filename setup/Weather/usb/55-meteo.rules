@@ -4,17 +4,13 @@
 # creates a symlink /dev/meteo
 #
 # V1.1 - 20100216/BM
+# V2.0 - 20200817/CA  - https://askubuntu.com/questions/978552/how-do-i-make-libusb-work-as-non-root
 #
 ACTION!="add", GOTO="meteo_rules_end"
-SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", GOTO="meteo_pid_test"
-SUBSYSTEM!="usb_device", GOTO="meteo_rules_end"
-
-LABEL="meteo_pid_test"
-
-# allow access permission via GROUP setting of those devices
-
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1941", ATTRS{idProduct}=="8021", MODE="0666"
+#
 # METEO USB - is an USB device with VID and PID that shall be used by YOUR_GROUP members and named DEVNAME
 # ENTER below-->  VID                       PID    METEO_USB                     DEVNAME
-SYSFS{idVendor}=="1941", SYSFS{idProduct}=="8021", OWNER="root", GROUP="video", MODE="0660", SYMLINK+="meteo"
-
+SYSFS{idVendor}=="1941", SYSFS{idProduct}=="8021", OWNER="root", GROUP="plugdev", MODE="0666", SYMLINK+="meteo"
+#
 LABEL="meteo_rules_end"
