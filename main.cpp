@@ -9,8 +9,7 @@
 #include <wx/file.h>     // wxFile
 #include <wx/cmdline.h>  // command line parser
 
-//#include "cf_utils/stringcnv.h"
-#include "cf_utils/lexical_cast.h"
+#include <boost/lexical_cast.hpp>
 #include "wsp/wsp_plus.h"
 
 #include "ck_sqlite3/sqlTransaction.h"
@@ -20,6 +19,7 @@
 #include "sqlTextExporter.h"
 #include "wsMeasurement.h"  // the old schema
 
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
    double orain_datum = 0.0;
    if(xrdat) {
       string xrdat_val = cnv(cmdMap[wxT("xrdat")]);
-      orain_datum     = lexical_cast<double>(xrdat_val);
+      orain_datum     = boost::lexical_cast<double>(xrdat_val);
    }
 
    // default sea level elevation
@@ -251,14 +251,14 @@ int main(int argc, char **argv)
       if(xelev) {
          // millibar pressure adjustment
          string xelev_val = cnv(cmdMap[wxT("xelev")]);
-         elevation     = lexical_cast<double>(xelev_val);
+         elevation     = boost::lexical_cast<double>(xelev_val);
       }
 
       if(xdays) {
          // report latess N days to output
 
          string xdays_val =  cnv(cmdMap[wxT("xdays")]);
-         int day_offset   = lexical_cast<int>(xdays_val);
+         int day_offset   = boost::lexical_cast<int>(xdays_val);
 
          time_t t_begin = sqlTextExporter::time_instance(-day_offset);
          time_t t_end   = sqlTextExporter::time_instance(0);
