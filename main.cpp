@@ -15,6 +15,8 @@
 #include "ck_sqlite3/sqlTransaction.h"
 #include "ck_sqlite3/sqlQuery.h"
 
+#include "udpsimple/udp_sender.h"
+
 #include "sqlWeatherStation.h"
 #include "sqlTextExporter.h"
 #include "wsMeasurement.h"  // the old schema
@@ -48,6 +50,7 @@ static const wxCmdLineEntryDesc cmdLineDesc[] =
   { wxCMD_LINE_SWITCH, wxT_2("i"),          wxT_2("init_db") ,   wxT_2("   Initialise new database"),                                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
   { wxCMD_LINE_SWITCH, wxT_2("l"),          wxT_2("latest") ,    wxT_2("   Show latest data on screen (1 entry)"),                            wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
   { wxCMD_LINE_SWITCH, wxT_2("s"),          wxT_2("store") ,     wxT_2("   Store latest data to database (1 entry)"),                         wxCMD_LINE_VAL_NONE,   wxCMD_LINE_PARAM_OPTIONAL    },
+  { wxCMD_LINE_OPTION, wxT_2("u"),          wxT_2("udp") ,       wxT_2("   Send latest data as UDP message to IP-address"),                   wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
   { wxCMD_LINE_OPTION, wxT_2("xd"),         wxT_2("xdays") ,     wxT_2("   Export <num> days to standard output"),                            wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL    },
   { wxCMD_LINE_OPTION, wxT_2("xe"),         wxT_2("xelev"),      wxT_2("      Export: Elevation above sea level, <str>=[m]"),                 wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
   { wxCMD_LINE_OPTION, wxT_2("xr"),         wxT_2("xrdat"),      wxT_2("      Export: Rain level datum, <str>=[mm]"),                         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL    },
@@ -153,6 +156,26 @@ inline std::string cnv(const wxString& wx_string)
 #endif
 }
 
+void send_udp(const string& ip_address, const wsp_data& data)
+{
+   ostringstream out;
+   out << "$WSDATA"
+       << ',' << data.tstmp
+       << ',' << data.itemp
+       << ',' << data.ihumi
+       << ',' << data.otemp
+       << ',' << data.ohumi
+       << ',' << data.opres
+       << ',' << data.owspd
+       << ',' << data.owgus
+       << ',' << data.owdir
+       << ',' << data.orain
+       << ',' << data.osens;
+
+   udp_sender udp(ip_address, 10253);
+   udp.send(out.str());
+}
+
 int main(int argc, char **argv)
 {
    // initialise wxWidgets library
@@ -173,7 +196,8 @@ int main(int argc, char **argv)
 
    bool init_db   = cmdMap.find(wxT("init_db"))  != cmdMap.end();
    bool latest    = cmdMap.find(wxT("latest"))   != cmdMap.end();
-   bool store     = cmdMap.find(wxT("store"))  != cmdMap.end();
+   bool store     = cmdMap.find(wxT("store"))    != cmdMap.end();
+   bool udp       = cmdMap.find(wxT("udp"))      != cmdMap.end();
    bool xdays     = cmdMap.find(wxT("xdays"))    != cmdMap.end();
    bool xelev     = cmdMap.find(wxT("xelev"))    != cmdMap.end();
    bool xhtml     = cmdMap.find(wxT("xhtml"))    != cmdMap.end();
@@ -226,7 +250,7 @@ int main(int argc, char **argv)
 
       // ================ data storeion
 
-      if(store || latest) {
+      if(store || latest || udp) {
          // read data from the weather station
          wsp_data data;
          get_wsp_data(&data);
@@ -243,6 +267,11 @@ int main(int argc, char **argv)
             // write to database
             sqlWeatherStation ws(db);
             ws.write(sqlWeatherStation::Data(data));
+         }
+
+         if(udp) {
+            string ip_address = cnv(cmdMap[wxT("udp")]);
+            send_udp(ip_address,data);
          }
       }
 
